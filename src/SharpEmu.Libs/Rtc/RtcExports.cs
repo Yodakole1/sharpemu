@@ -1000,17 +1000,14 @@ public static class RtcExports
 
     private static bool TryConvertTickToRtcDateTime(ulong tick, out RtcDateTime time)
     {
-        try
-        {
-            var dateTime = new DateTime(checked((long)(tick * DateTimeTicksPerMicrosecond)), DateTimeKind.Utc);
-            time = ToRtcDateTime(dateTime);
-            return true;
-        }
-        catch (ArgumentOutOfRangeException)
+        if (!TryConvertTickToDateTime(tick, out var dateTime))
         {
             time = default;
             return false;
         }
+
+        time = ToRtcDateTime(dateTime);
+        return true;
     }
 
     private readonly record struct RtcDateTime(

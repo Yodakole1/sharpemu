@@ -107,6 +107,18 @@ public sealed class RtcExportsTests
         AssertRtc(TimeAddress, 2000, 1, 1, 0, 0, 0, 0);
     }
 
+    [Theory]
+    [InlineData(ulong.MaxValue)]
+    [InlineData(long.MaxValue / 10 + 1)]
+    public void SetTick_TickBeyondDateTimeRange_ReturnsErrorInsteadOfThrowing(ulong tick)
+    {
+        Assert.True(_ctx.TryWriteUInt64(TickAddress, tick));
+        _ctx[CpuRegister.Rdi] = TimeAddress;
+        _ctx[CpuRegister.Rsi] = TickAddress;
+
+        Assert.Equal(unchecked((int)0x80B50004), RtcExports.RtcSetTick(_ctx));
+    }
+
     [Fact]
     public void GetWin32FileTime_UnixEpoch_MatchesKnownFileTime()
     {
