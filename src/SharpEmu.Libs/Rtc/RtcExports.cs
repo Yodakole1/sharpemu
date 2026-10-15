@@ -705,7 +705,10 @@ public static class RtcExports
         }
 
         var timeSeconds = unchecked((long)ctx[CpuRegister.Rsi]);
-        if (timeSeconds < 0)
+        // Largest value that still fits a 9999-12-31T23:59:59 tick; anything above would also
+        // overflow the seconds-to-microseconds multiplication below and wrap to a small tick.
+        const long MaxUnixSeconds = 253_402_300_799;
+        if (timeSeconds < 0 || timeSeconds > MaxUnixSeconds)
         {
             return unchecked((int)0x80B50003);
         }

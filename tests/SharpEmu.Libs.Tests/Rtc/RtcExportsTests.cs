@@ -107,6 +107,17 @@ public sealed class RtcExportsTests
         AssertRtc(TimeAddress, 2000, 1, 1, 0, 0, 0, 0);
     }
 
+    [Theory]
+    [InlineData(18_446_744_073_710UL)] // seconds * 1,000,000 wraps past 2^64 back to a tiny tick
+    [InlineData(253_402_300_800UL)]    // one second past 9999-12-31T23:59:59
+    public void SetTimeT_SecondsBeyondYear9999_ReturnsErrorInsteadOfWrapping(ulong seconds)
+    {
+        _ctx[CpuRegister.Rdi] = TimeAddress;
+        _ctx[CpuRegister.Rsi] = seconds;
+
+        Assert.Equal(unchecked((int)0x80B50003), RtcExports.RtcSetTimeT(_ctx));
+    }
+
     [Fact]
     public void GetWin32FileTime_UnixEpoch_MatchesKnownFileTime()
     {
